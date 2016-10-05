@@ -19,10 +19,15 @@ class ViewController: UIViewController {
     // MARK: The label to display our calculations
     var resultLabel = UILabel()
     
+    var curr: Int = 0
+    var isNextVal: Bool = false
+    var prev: Double = 0
+    var operation: String = ""
+    
     // TODO: This looks like a good place to add some data structures.
     //       One data structure is initialized below for reference.
-    var someDataStructure: [String] = [""]
-    
+    var someDataStructure: [String] = ["0"]
+    var intDataStructure: [Int] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,12 +51,25 @@ class ViewController: UIViewController {
     // TODO: A method to update your data structure(s) would be nice.
     //       Modify this one or create your own.
     func updateSomeDataStructure(_ content: String) {
+        if (content == "") {
+            someDataStructure[curr] = content
+        } else if (resultLabel.text == "0") {
+          someDataStructure[curr] = content
+        } else {
+            someDataStructure[curr].append(content)
+        }
+        updateResultLabel(someDataStructure[curr])
         print("Update me like one of those PCs")
     }
     
     // TODO: Ensure that resultLabel gets updated.
     //       Modify this one or create your own.
     func updateResultLabel(_ content: String) {
+        if (content.characters.count <= 7) {
+            resultLabel.text = content
+        } else if (content == "") {
+            resultLabel.text = content
+        }
         print("Update me like one of those PCs")
     }
     
@@ -81,16 +99,262 @@ class ViewController: UIViewController {
         guard Int(sender.content) != nil else { return }
         print("The number \(sender.content) was pressed")
         // Fill me in!
+        updateSomeDataStructure(sender.content)
     }
     
     // REQUIRED: The responder to an operator button being pressed.
     func operatorPressed(_ sender: CustomButton) {
         // Fill me in!
+        
+        if sender.content == "C" {
+            updateSomeDataStructure("")
+            updateResultLabel("0")
+        } else if (sender.content == "0" && (resultLabel.text! != "0")) {
+            resultLabel.text = resultLabel.text ?? "" + "0"
+        } else if (sender.content == "+/-") {
+            if someDataStructure[curr].contains("-") {
+                someDataStructure[curr].remove(at: someDataStructure[curr].startIndex)
+                updateResultLabel(someDataStructure[curr])
+            } else {
+                someDataStructure[curr] = "-" + someDataStructure[curr]
+                updateResultLabel(someDataStructure[curr])
+            }
+        } else if (sender.content == "%") {
+            let val = (Double(someDataStructure[curr]))!/100
+            someDataStructure[0] = String(describing: val)
+            updateResultLabel(someDataStructure[curr])
+        } else if (sender.content == "+") {
+            if (someDataStructure.count > 1 && someDataStructure[curr] != "" && someDataStructure[curr + 1] != "") {
+                if operation == "*" {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! * Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "+") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! + Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "-") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! - Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "/") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! / Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                }
+            }
+            let val = (Double(someDataStructure[curr]))!
+            if (someDataStructure.count == 1) {
+                someDataStructure.append(String(describing: val))
+            } else {
+                someDataStructure[curr+1] = String(describing: val)
+            }
+            someDataStructure[curr] = ""
+            operation = "+"
+        } else if (sender.content == "-") {
+            if (someDataStructure.count > 1 && someDataStructure[curr] != "" && someDataStructure[curr + 1] != "") {
+                if operation == "*" {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! * Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "+") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! + Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "-") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! - Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "/") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! / Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                }
+            }
+
+            let val = (Double(someDataStructure[curr]))!
+            if (someDataStructure.count == 1) {
+                someDataStructure.append(String(describing: val))
+            } else {
+                someDataStructure[curr+1] = String(describing: val)
+            }
+            someDataStructure[curr] = ""
+            operation = "-"
+        } else if (sender.content == "*") {
+            if (someDataStructure.count > 1 && someDataStructure[curr] != "" && someDataStructure[curr + 1] != "") {
+                if operation == "*" {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! * Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "+") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! + Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "-") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! - Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "/") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! / Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                }
+            }
+
+            let val = (Double(someDataStructure[curr]))!
+            if (someDataStructure.count == 1) {
+                someDataStructure.append(String(describing: val))
+            } else {
+                someDataStructure[curr+1] = String(describing: val)
+            }
+            someDataStructure[curr] = ""
+            operation = "*"
+        } else if (sender.content == "/") {
+            if (someDataStructure.count > 1 && someDataStructure[curr] != "" && someDataStructure[curr + 1] != "") {
+                if operation == "*" {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! * Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "+") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! + Double(someDataStructure[curr+1])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "-") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! - Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                } else if (operation == "/") {
+                    someDataStructure[curr] = String(describing: Double(someDataStructure[curr+1])! / Double(someDataStructure[curr])!)
+                    let length = someDataStructure[curr].characters.count
+                    if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                        let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                        someDataStructure[curr].removeSubrange(range)
+                    }
+                    updateResultLabel(someDataStructure[curr])
+                }
+            }
+            let val = (Double(someDataStructure[curr]))!
+            if (someDataStructure.count == 1) {
+                someDataStructure.append(String(describing: val))
+            } else {
+                someDataStructure[curr+1] = String(describing: val)
+            }
+            someDataStructure[curr] = ""
+            operation = "/"
+        } else if (sender.content == "=") {
+            if (operation == "+") {
+                someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! + Double(someDataStructure[curr+1])!)
+                someDataStructure[curr+1] = ""
+                let length = someDataStructure[curr].characters.count
+                if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                    let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                    someDataStructure[curr].removeSubrange(range)
+                }
+                updateResultLabel(someDataStructure[curr])
+            } else if (operation == "-") {
+                someDataStructure[curr] = String(describing: Double(someDataStructure[curr + 1])! - Double(someDataStructure[curr])!)
+                someDataStructure[curr+1] = ""
+                let length = someDataStructure[curr].characters.count
+                if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                    let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                    someDataStructure[curr].removeSubrange(range)
+                }
+                updateResultLabel(someDataStructure[curr])
+            } else if (operation == "*") {
+                someDataStructure[curr] = String(describing: Double(someDataStructure[curr])! * Double(someDataStructure[curr+1])!)
+                someDataStructure[curr+1] = ""
+                let length = someDataStructure[curr].characters.count
+                if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                    let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                    someDataStructure[curr].removeSubrange(range)
+                }
+                updateResultLabel(someDataStructure[curr])
+            } else if (operation == "/") {
+                someDataStructure[curr] = String(describing: Double(someDataStructure[curr + 1])! / Double(someDataStructure[curr])!)
+                someDataStructure[curr+1] = ""
+                let length = someDataStructure[curr].characters.count
+                if (someDataStructure[curr][someDataStructure[curr].index(before: someDataStructure[curr].endIndex)] == "0" && someDataStructure[curr][someDataStructure[curr].index(someDataStructure[curr].startIndex, offsetBy: length-2)] == ".") {
+                    let range = someDataStructure[curr].index(someDataStructure[curr].endIndex, offsetBy: -2)..<someDataStructure[curr].endIndex
+                    someDataStructure[curr].removeSubrange(range)
+                }
+                updateResultLabel(someDataStructure[curr])
+            }
+        }
     }
+    
     
     // REQUIRED: The responder to a number or operator button being pressed.
     func buttonPressed(_ sender: CustomButton) {
        // Fill me in!
+        if sender.content == "C" {
+            updateResultLabel("0")
+        } else if (sender.content == "0" && (resultLabel.text! != "0")) {
+            someDataStructure[curr] = someDataStructure[curr] + "0"
+            updateResultLabel(someDataStructure[curr])
+        } else if (sender.content == "." && !someDataStructure[curr].contains(".")) {
+            someDataStructure[curr] = someDataStructure[curr] + "."
+            updateResultLabel(someDataStructure[curr])
+        }
     }
     
     // IMPORTANT: Do NOT change any of the code below.
